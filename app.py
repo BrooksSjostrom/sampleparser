@@ -57,7 +57,7 @@ def parse_file(data: bytes) -> list:
         records.append({
             "number": idx + 1,
             "date": dt.strftime("%Y-%m-%d"),
-            "time": dt.strftime("%I:%M:%S %p"),
+            "time": dt.strftime("%I:%M %p"),
             "sample_number": seq,
             "result": evt_name,
             "category": cat_style(evt_name)[0],
@@ -150,7 +150,7 @@ def results():
         name = SAMPLER_NAMES.get(device, device)
         for export, records in exports.items():
             try:
-                ts_label = str(EPOCH + timedelta(seconds=int(export)))
+                ts_label = (EPOCH + timedelta(seconds=int(export))).strftime("%Y-%m-%d %I:%M:%S %p")
             except Exception:
                 ts_label = export
             success = sum(1 for r in records if r["result"] == "Success")
