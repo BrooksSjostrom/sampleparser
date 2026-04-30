@@ -122,6 +122,13 @@
       margin-right: 0.4rem;
     }
     .copy-btn:hover { background: #f0f0f0; }
+    .cell-view { overflow-x: auto; margin-bottom: 0.6rem; }
+    .cell-table { border-collapse: collapse; font-size: 0.78rem; }
+    .cell-table th, .cell-table td { border: 1px solid #ccc; padding: 0.2rem 0.4rem; text-align: center; min-width: 1.6rem; }
+    .cell-table th { background: #e8f0fa; color: #1F4E79; font-weight: bold; }
+    .cell-table td.cell-1 { background: #E2EFDA; color: #375623; font-weight: bold; }
+    .cell-table td.cell-0 { background: #FFC7CE; color: #C00000; font-weight: bold; }
+    .cell-view.hidden { display: none; }
     .table-wrap.hidden { display: none; }
   </style>
 </head>
@@ -158,6 +165,19 @@
       {% endfor %}
     </div>
     <button class="copy-btn" onclick="copyBits(this)">Copy</button>
+    <button class="toggle-btn" onclick="toggleCells(this)">Show cell view</button>
+    <div class="cell-view hidden">
+      <table class="cell-table">
+        <thead><tr>
+          {% for r in d.records %}<th>{{ loop.index }}</th>{% endfor %}
+        </tr></thead>
+        <tbody><tr>
+          {% for r in d.records %}
+            {% if r.result == 'Success' %}<td class="cell-1">1</td>{% else %}<td class="cell-0">0</td>{% endif %}
+          {% endfor %}
+        </tr></tbody>
+      </table>
+    </div>
 
     <button class="toggle-btn" onclick="toggleTable(this)">Show detail table</button>
     <div class="table-wrap hidden">
@@ -201,6 +221,12 @@
     const wrap = btn.nextElementSibling;
     const hidden = wrap.classList.toggle('hidden');
     btn.textContent = hidden ? 'Show detail table' : 'Hide detail table';
+  }
+
+  function toggleCells(btn) {
+    const view = btn.nextElementSibling;
+    const hidden = view.classList.toggle('hidden');
+    btn.textContent = hidden ? 'Show cell view' : 'Hide cell view';
   }
 
   function copyBits(btn) {

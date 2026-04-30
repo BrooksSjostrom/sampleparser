@@ -9,3 +9,7 @@ __pycache__/
 *.xlsx
 *.bin
 /tmp/
+.DS_Store
+.idea/
+boxenv/
+*.pdf
