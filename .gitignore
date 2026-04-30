@@ -13,3 +13,7 @@ __pycache__/
 .idea/
 boxenv/
 *.pdf
+boxtest.py
+listdir.py
+samplog.c
+images/
