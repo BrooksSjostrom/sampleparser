@@ -1,20 +1,18 @@
-# samplog.py
+# SampLog Parser
 
-A command-line tool for parsing and exporting sample logs from **Hach AS950** portable autosamplers.
+A web app for parsing and exporting sample logs from **Hach AS950** portable autosamplers.
 
----
-
-## Requirements
-
-- Python 3.6 or later — install from [python.org](https://www.python.org/downloads/) (**do not use the system Python on macOS**)
-
-> **macOS users:** Run this script inside a conda environment or using a Python.org installation. The system Python shipped with macOS has an incompatible Tcl/Tk version that will cause a tkinter error.
+**Live at: [brookssj.pythonanywhere.com](https://brookssj.pythonanywhere.com)**
 
 ---
 
-## Data Folder Structure
+## How to Use the Web App
 
-The script expects a folder structure like the one the AS950 software creates when downloading data:
+### Step 1 — Download data from the sampler
+
+Follow the steps in the [Downloading Data](#downloading-data-from-the-sampler) section below to export data from each sampler onto a USB flash drive.
+
+Copy the `Data/` folder from the flash drive to your computer. If you have data from multiple samplers or previous downloads, merge them all into one `Data/` folder with this structure:
 
 ```
 Data/
@@ -29,7 +27,94 @@ Data/
     └── ...
 ```
 
-Point the script at the top-level `Data/` folder using `-d` or `-c`.
+### Step 2 — Open the web app
+
+Go to **[brookssj.pythonanywhere.com](https://brookssj.pythonanywhere.com)**.
+
+### Step 3 — Upload the Data folder
+
+Click **"Click to select your Data/ folder"** and select the `Data/` folder on your computer. The app will find all `SampLog.bin` files inside automatically — you don't need to zip anything.
+
+Choose whether to include only the **most recent download** from each sampler, or **all downloads**.
+
+Click **Parse & View**.
+
+### Step 4 — View and download results
+
+The results page shows each sampler with:
+- A summary of total samples, successes, and failures
+- A visual pass/fail sequence (✓ = collected, ✗ = missed/failed)
+- A **Copy** button to copy the sequence as a tab-separated string of 1s and 0s
+- A **Show detail table** button for the full log with timestamps and event types
+
+Use the **Download CSV** or **Download JSON** buttons at the top to export the data.
+
+---
+
+## Sample Results
+
+| Result | Description |
+|---|---|
+| `Success` | Sample collected successfully |
+| `Missed Sample` | Sample not collected, no specific reason recorded |
+| `Rinse Error` | Error during rinse cycle |
+| `Purge Fail` | Purge cycle failed |
+| `Pump Fault` | Pump hardware fault |
+| `Pump Low Volt` | Pump voltage too low |
+| `Sample Timeout` | Sample collection timed out |
+| `User Abort` | Sample aborted by user |
+| `Arm Faulty` | Distributor arm fault |
+| `Lapse Error` | Lapse timing error |
+| `Bottle Full` | Bottle full, sample not collected |
+
+---
+
+## CSV Format
+
+```
+Serial Number, Name, Export, 1, 2, 3, ... 36
+203250017534, Alvin, 829754326, 1, 1, 1, 0, ...
+```
+
+Each column after **Export** is a sample slot — `1` for success, `0` for missed or failed.
+
+---
+
+## Sampler Names
+
+Serial numbers are mapped to names in `app.py`. Update this if your samplers have different serial numbers:
+
+```python
+SAMPLER_NAMES = {
+    "203250017534": "Alvin",
+    "203280017535": "Simon",
+    "203280017536": "Theo"
+}
+```
+
+---
+
+## Command-Line Tool
+
+A command-line version (`samplog.py`) is also available for advanced use. See the usage instructions below.
+
+### Requirements
+
+- Python 3.6 or later
+
+### Usage
+
+```bash
+python3 samplog.py -d /path/to/Data -f csv
+```
+
+| Argument | Options | Default | Description |
+|---|---|---|---|
+| `-d`, `--directory` | path | — | Path to the Data folder |
+| `-c`, `--choose` | — | — | Open a folder picker dialog |
+| `-f`, `--format` | `print` `csv` `json` | `print` | Output format |
+| `-e`, `--exports` | `recent` `all` | `recent` | Use only the most recent download, or all |
+| `-o`, `--output` | filename | `out.csv` / `out.json` | Output filename |
 
 ---
 
@@ -63,87 +148,3 @@ You will need a USB flash drive for each download.
 
 On the flash drive, the exported files will be located at `AS950/Data/`. The `Data/` folder contains a subfolder named with the sampler's serial number, and inside that a subfolder named with the Unix timestamp of the download. Copy the `Data/` folder from the flash drive to your computer, merging with any existing data.
 
----
-
-## Usage
-
-```bash
-python3 samplog.py -d /path/to/Data -f csv
-```
-
-### Arguments
-
-| Argument | Options | Default | Description |
-|---|---|---|---|
-| `-d`, `--directory` | path | — | Path to the Data folder |
-| `-c`, `--choose` | — | — | Open a folder picker dialog |
-| `-f`, `--format` | `print` `csv` `json` `xlsx` | `print` | Output format |
-| `-e`, `--exports` | `recent` `all` | `recent` | Use only the most recent download, or all downloads |
-| `-o`, `--output` | filename | `out.csv` / `out.json` | Output filename (csv and json only) |
-
-> Either `-d` or `-c` is required.
-
-### Examples
-
-Print results to the terminal:
-```bash
-python3 samplog.py -d ~/Downloads/Data
-```
-
-Export the most recent download from each sampler to CSV:
-```bash
-python3 samplog.py -d ~/Downloads/Data -f csv -o results.csv
-```
-
-Export all downloads from all samplers to JSON:
-```bash
-python3 samplog.py -d ~/Downloads/Data -f json -e all -o results.json
-```
-
-Use the folder picker to select the Data folder:
-```bash
-python3 samplog.py -c -f csv
-```
-
----
-
-## Output
-
-Each sample is recorded as a `1` (success) or `0` (missed/failed). In CSV and JSON output, the full result name is also included.
-
-### Sample results
-
-| Result | Description |
-|---|---|
-| `Success` | Sample collected successfully |
-| `Missed Sample` | Sample not collected, no specific reason recorded |
-| `Rinse Error` | Error during rinse cycle |
-| `Purge Fail` | Purge cycle failed |
-| `Pump Fault` | Pump hardware fault |
-| `Pump Low Volt` | Pump voltage too low |
-| `Sample Timeout` | Sample collection timed out |
-| `User Abort` | Sample aborted by user |
-| `Arm Faulty` | Distributor arm fault |
-| `Lapse Error` | Lapse timing error |
-| `Bottle Full` | Bottle full, sample not collected |
-
-### CSV format
-
-```
-Serial number, Name, Export, 1, 2, 3, ... 36
-203250017534, Alvin, 829754326, 1, 1, 1, 0, ...
-```
-
----
-
-## Sampler Names
-
-The serial numbers are mapped to names in the `SAMPLER_NAMES` dictionary at the top of the script. Update this if your samplers have different serial numbers or names:
-
-```python
-SAMPLER_NAMES = {
-    "203250017534": "Alvin",
-    "203280017535": "Simon",
-    "203280017536": "Theo"
-}
-```
