@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 from flask import Flask, render_template, request, send_file, session, redirect, url_for
 
 app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY", "change-this-before-deploying")
+app.secret_key = "samplog-brookssj-2024"
 
 SAMPLER_NAMES = {
     "203250017534": "Alvin",
